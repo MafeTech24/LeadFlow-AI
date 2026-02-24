@@ -146,4 +146,14 @@ La modularidad permite reutilizar cada componente de forma independiente:
 
 ---
 
-Desarrollado por [MafeTech](https://mafetech.vercel.app) · Córdoba, Argentina
+## Author
+
+Maria Fernanda Moreno
+
+Automation Developer  
+AI Automation Specialist  
+n8n Developer  
+
+> Showcase de proyectos: https://showcase-de-automatizaciones-y-webs.vercel.app/
+---
+
