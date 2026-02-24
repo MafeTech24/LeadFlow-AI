@@ -1,0 +1,52 @@
+{
+  "name": "SW_01_validar_normalizar_input",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "nombre" },
+            { "name": "email" },
+            { "name": "mensaje" },
+            { "name": "empresa" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "id": "cde8a696-61cc-4764-9627-e5ccc23a116b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Campos requeridos\nconst required = ['nombre', 'email', 'mensaje'];\nconst missing = required.filter(f => !input[f] || input[f].toString().trim() === '');\n\nif (missing.length > 0) {\n  throw new Error(`Campos faltantes: ${missing.join(', ')}`);\n}\n\n// Validación de email\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(input.email)) {\n  throw new Error(`Email inválido: ${input.email}`);\n}\n\nreturn [{\n  json: {\n    nombre: input.nombre.trim(),\n    email: input.email.toLowerCase().trim(),\n    empresa: input.empresa?.trim() || 'No especificada',\n    mensaje: input.mensaje.trim(),\n    timestamp: new Date().toISOString(),\n    execution_id: $execution.id ?? $runIndex + '_' + Date.now()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [208, 0],
+      "id": "68ef21a3-78bc-4b9c-a3b5-0a68af4acf4e",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "nombre": "María García",
+          "email": "maria@empresa.com",
+          "mensaje": "Estoy interesada en sus servicios de automatización para mi empresa de 50 empleados",
+          "empresa": "Tech Solutions"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

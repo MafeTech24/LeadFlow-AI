@@ -1,0 +1,160 @@
+{
+  "name": "MAIN_pipeline_leads",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pipeline-leads",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-128, 0],
+      "id": "9be0d3cc-c6f1-4e6d-ba30-da205c25b624",
+      "name": "Webhook",
+      "webhookId": "pipeline-leads-webhook"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SW_01_ID_HERE"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.body.nombre }}",
+            "email": "={{ $json.body.email }}",
+            "mensaje": "={{ $json.body.mensaje }}",
+            "empresa": "={{ $json.body.empresa }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [48, 0],
+      "id": "3576c8e9-1e24-4e1c-9008-517756f1ef26",
+      "name": "Call 'SW_01_validar_normalizar_input'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SW_02_ID_HERE"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.nombre }}",
+            "email": "={{ $json.email }}",
+            "mensaje": "={{ $json.mensaje }}",
+            "empresa": "={{ $json.empresa }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "execution_id": "={{ $json.execution_id }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [240, 0],
+      "id": "8fe32201-302e-4ea6-b1ab-943d1dd0fd79",
+      "name": "Call 'SW_02_clasificar_con_IA'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SW_03_ID_HERE"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.nombre }}",
+            "email": "={{ $json.email }}",
+            "empresa": "={{ $json.empresa }}",
+            "mensaje": "={{ $json.mensaje }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "execution_id": "={{ $json.execution_id }}",
+            "score": "={{ $json.score.toString() }}",
+            "categoria": "={{ $json.categoria }}",
+            "motivo": "={{ $json.motivo }}",
+            "urgencia": "={{ $json.urgencia }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [432, 0],
+      "id": "540428ce-06c3-4c89-8f09-82f8c3ef1f2e",
+      "name": "Call 'SW_03_persistir_log'"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 3 },
+          "conditions": [
+            {
+              "id": "a5e21aad-f673-4bae-8798-1164892b71ee",
+              "leftValue": "={{ $json.categoria }}",
+              "rightValue": "hot",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [608, 0],
+      "id": "5ced5e49-0dcf-42b9-9c78-08fdbc08d86e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "=🔥 Nuevo lead HOT: {{ $json.nombre }}",
+        "message": "=Nombre: {{ $json.nombre }}\nEmail: {{ $json.email }}\nEmpresa: {{ $json.empresa }}\nScore: {{ $json.score }}\nMotivo: {{ $json.motivo }}\nUrgencia: {{ $json.urgencia }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [832, -96],
+      "id": "9f757b02-3f57-4aa0-a64a-444d553dcafc",
+      "name": "Send a message",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Call 'SW_01_validar_normalizar_input'", "type": "main", "index": 0 }]]
+    },
+    "Call 'SW_01_validar_normalizar_input'": {
+      "main": [[{ "node": "Call 'SW_02_clasificar_con_IA'", "type": "main", "index": 0 }]]
+    },
+    "Call 'SW_02_clasificar_con_IA'": {
+      "main": [[{ "node": "Call 'SW_03_persistir_log'", "type": "main", "index": 0 }]]
+    },
+    "Call 'SW_03_persistir_log'": {
+      "main": [[{ "node": "If", "type": "main", "index": 0 }]]
+    },
+    "If": {
+      "main": [[{ "node": "Send a message", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

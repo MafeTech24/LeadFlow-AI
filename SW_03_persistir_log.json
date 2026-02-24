@@ -1,0 +1,81 @@
+{
+  "name": "SW_03_persistir_log",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "nombre" },
+            { "name": "email" },
+            { "name": "empresa" },
+            { "name": "mensaje" },
+            { "name": "timestamp" },
+            { "name": "execution_id" },
+            { "name": "score" },
+            { "name": "categoria" },
+            { "name": "motivo" },
+            { "name": "urgencia" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "id": "4dabeabd-e67d-41c1-913f-f5e3cd965d4e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "hoja 1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "type": "string" },
+            { "id": "nombre", "displayName": "nombre", "type": "string" },
+            { "id": "email", "displayName": "email", "type": "string" },
+            { "id": "empresa", "displayName": "empresa", "type": "string" },
+            { "id": "mensaje", "displayName": "mensaje", "type": "string" },
+            { "id": "score", "displayName": "score", "type": "string" },
+            { "id": "categoria", "displayName": "categoria", "type": "string" },
+            { "id": "motivo", "displayName": "motivo", "type": "string" },
+            { "id": "urgencia", "displayName": "urgencia", "type": "string" },
+            { "id": "execution_id", "displayName": "execution_id", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [208, 0],
+      "id": "17d75bcb-8a47-4cf5-ab71-d31343457deb",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [[{ "node": "Append row in sheet", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

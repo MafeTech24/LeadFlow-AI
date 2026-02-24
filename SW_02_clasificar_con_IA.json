@@ -1,0 +1,80 @@
+{
+  "name": "SW_02_clasificar_con_IA",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "nombre" },
+            { "name": "email" },
+            { "name": "mensaje" },
+            { "name": "empresa" },
+            { "name": "timestamp" },
+            { "name": "execution_id" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "id": "3f00109f-3f9e-44b1-94c9-a05a8440ac19",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Eres un clasificador de leads comerciales. Analizá el siguiente mensaje y respondé ÚNICAMENTE con un JSON válido sin markdown, con esta estructura exacta:\\n{\\\"score\\\": <número del 1 al 10>, \\\"categoria\\\": <\\\"hot\\\"|\\\"warm\\\"|\\\"cold\\\">, \\\"motivo\\\": <string corto>, \\\"urgencia\\\": <\\\"alta\\\"|\\\"media\\\"|\\\"baja\\\">}\\n\\nDatos del lead:\\nNombre: {{ $json.nombre }}\\nEmpresa: {{ $json.empresa }}\\nMensaje: {{ $json.mensaje }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [208, 0],
+      "id": "64bf386f-50ab-4c4a-99e5-2fe3027e00ae",
+      "name": "Gemini - Clasificar lead",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.candidates[0].content.parts[0].text;\n\n// Limpiar por si Gemini agrega markdown\nconst cleaned = rawText.replace(/```json|```/g, '').trim();\n\nconst clasificacion = JSON.parse(cleaned);\n\n// Traemos también los datos del lead del input anterior\nconst lead = $('When Executed by Another Workflow').first().json;\n\nreturn [{\n  json: {\n    nombre: lead.nombre,\n    email: lead.email,\n    empresa: lead.empresa,\n    mensaje: lead.mensaje,\n    timestamp: lead.timestamp,\n    execution_id: lead.execution_id,\n    score: clasificacion.score,\n    categoria: clasificacion.categoria,\n    motivo: clasificacion.motivo,\n    urgencia: clasificacion.urgencia\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [416, 0],
+      "id": "c1bfc36d-9e41-4e56-8857-516516ac5462",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "nombre": "María García",
+          "email": "maria@empresa.com",
+          "empresa": "Tech Solutions",
+          "mensaje": "Hola, estoy interesada en sus servicios de automatización para mi empresa de 50 empleados"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [[{ "node": "Gemini - Clasificar lead", "type": "main", "index": 0 }]]
+    },
+    "Gemini - Clasificar lead": {
+      "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
