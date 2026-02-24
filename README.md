@@ -2,9 +2,25 @@
 
 Pipeline de automatización para captura, validación y clasificación de leads comerciales usando n8n + Gemini AI + Google Sheets.
 
+
 ## ¿Qué hace?
 
 Recibe un lead via webhook → lo valida → lo clasifica con IA (hot/warm/cold) → lo guarda en Google Sheets → notifica por email si es HOT.
+
+
+![alt text](./assets/mainPipelineLeadsFuncionando.jpg)
+
+
+## Resultados en tiempo real
+
+
+### 📊 Leads clasificados en Google Sheets
+![Leads clasificados](./assets/leadsClasificados.jpg)
+
+
+### 📧 Alertas automáticas por email
+![Alertas email](./assets/alertasEmail.jpg)
+
 
 ```
 [Webhook POST] 
